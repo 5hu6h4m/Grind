@@ -9,12 +9,13 @@ import { addHabit, toggleHabit } from '@/app/actions';
 
 interface DashboardClientProps {
   initialHabits: HabitData[];
+  initialActivityMap: Record<string, number>;
 }
 
-export default function DashboardClient({ initialHabits }: DashboardClientProps) {
+export default function DashboardClient({ initialHabits, initialActivityMap }: DashboardClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // We use local state for optimistic UI updates
   const [habits, setHabits] = useState<HabitData[]>(initialHabits);
+  const [activityMap, setActivityMap] = useState<Record<string, number>>(initialActivityMap);
 
   const handleAddHabit = async (newHabit: Omit<HabitData, 'id' | 'streak' | 'isCompletedToday'>) => {
     // Optimistic update
@@ -37,8 +38,19 @@ export default function DashboardClient({ initialHabits }: DashboardClientProps)
   };
 
   const handleToggleHabit = async (id: string, isCompleted: boolean) => {
-    // Optimistic update
+    // Optimistic update for habits
     setHabits(habits.map(h => h.id === id ? { ...h, isCompletedToday: isCompleted } : h));
+
+    // Optimistic update for heatmap (today)
+    const todayStr = new Date().toISOString().split('T')[0];
+    setActivityMap(prev => {
+      const current = prev[todayStr] || 0;
+      return {
+        ...prev,
+        [todayStr]: Math.max(0, current + (isCompleted ? 1 : -1))
+      };
+    });
+
     // Server action
     await toggleHabit(id, isCompleted);
   };
@@ -143,7 +155,7 @@ export default function DashboardClient({ initialHabits }: DashboardClientProps)
           </div>
 
           <div className="mt-4">
-            <Heatmap />
+            <Heatmap activityMap={activityMap} />
           </div>
         </div>
 

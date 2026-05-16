@@ -36,5 +36,18 @@ export default async function DashboardPage() {
     };
   });
 
-  return <DashboardClient initialHabits={initialHabits} />;
+  // Generate an activity map for the last 98 days for the Heatmap
+  const activityMap: Record<string, number> = {};
+  dbHabits.forEach(habit => {
+    habit.completions.forEach(completion => {
+      const dateStr = new Date(completion.date).toISOString().split('T')[0];
+      if (!activityMap[dateStr]) {
+        activityMap[dateStr] = 0;
+      }
+      // Add XP or just count to the day's intensity. Let's add 1 intensity per completed habit.
+      activityMap[dateStr] += 1;
+    });
+  });
+
+  return <DashboardClient initialHabits={initialHabits} initialActivityMap={activityMap} />;
 }

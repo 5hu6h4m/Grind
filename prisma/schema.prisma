@@ -1,0 +1,30 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Habit {
+  id          String   @id @default(uuid())
+  title       String
+  category    String
+  xp          Int
+  color       String
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  completions Completion[]
+}
+
+model Completion {
+  id        String   @id @default(uuid())
+  habitId   String
+  date      DateTime @default(now()) // We will store the exact day
+  
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  // Ensure a habit can only be completed once per day
+  @@unique([habitId, date])
+}

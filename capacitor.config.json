@@ -1,0 +1,9 @@
+{
+  "appId": "com.grind.app",
+  "appName": "Grind",
+  "webDir": "out",
+  "server": {
+    "url": "https://grind-prod-qtbxsqvpgrixyzqbqttd.vercel.app",
+    "cleartext": true
+  }
+}

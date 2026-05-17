@@ -3,7 +3,7 @@
   "appName": "Grind",
   "webDir": "out",
   "server": {
-    "url": "https://grind-prod-qtbxsqvpgrixyzqbqttd.vercel.app",
+    "url": "http://192.168.1.12:3000",
     "cleartext": true
   }
 }

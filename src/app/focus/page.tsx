@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Zap, Play, Pause, RotateCcw } from 'lucide-react';
+import { Zap, Play, Pause, RotateCcw, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import { playFocusEndSound } from '@/lib/sound';
 
 export default function FocusMode() {
   const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 minutes
@@ -15,7 +17,8 @@ export default function FocusMode() {
       }, 1000);
     } else if (timeLeft === 0) {
       setIsActive(false);
-      // Play sound here
+      // Play a premium synthetic zen chime sound
+      playFocusEndSound();
     }
     return () => clearInterval(interval);
   }, [isActive, timeLeft]);
@@ -30,7 +33,15 @@ export default function FocusMode() {
   const seconds = timeLeft % 60;
 
   return (
-    <main className="min-h-screen p-6 md:p-10 max-w-7xl mx-auto flex flex-col items-center justify-center pb-24">
+    <main className="min-h-screen p-6 md:p-10 max-w-7xl mx-auto flex flex-col items-center justify-center pb-24 relative">
+      {/* Back Button */}
+      <Link 
+        href="/dashboard" 
+        className="absolute top-8 left-8 inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm font-medium"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        <span>Back to Dashboard</span>
+      </Link>
       <div className="glass p-12 rounded-[3rem] border border-neon-cyan/20 flex flex-col items-center justify-center shadow-[0_0_50px_rgba(34,211,238,0.1)] text-center relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-neon-cyan/10 rounded-full blur-3xl -mr-20 -mt-20" />
         

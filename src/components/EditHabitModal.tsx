@@ -15,33 +15,31 @@ export interface HabitData {
   completedDates: string[];
 }
 
-interface AddHabitModalProps {
+interface EditHabitModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddHabit: (habit: Omit<HabitData, 'id' | 'streak' | 'completedDates'>) => void;
+  initialData: { title: string; category: string; xp: number; color: 'purple' | 'cyan' | 'green' | 'orange' };
+  onEditHabit: (habit: { title: string; category: string; xp: number; color: 'purple' | 'cyan' | 'green' | 'orange' }) => void;
 }
 
-export default function AddHabitModal({ isOpen, onClose, onAddHabit }: AddHabitModalProps) {
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
-  const [color, setColor] = useState<'purple' | 'cyan' | 'green' | 'orange'>('purple');
-  const [xp, setXp] = useState(50);
+export default function EditHabitModal({ isOpen, onClose, initialData, onEditHabit }: EditHabitModalProps) {
+  const [title, setTitle] = useState(initialData.title);
+  const [category, setCategory] = useState(initialData.category);
+  const [color, setColor] = useState<'purple' | 'cyan' | 'green' | 'orange'>(initialData.color);
+  const [xp, setXp] = useState(initialData.xp);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !category) return;
 
-    onAddHabit({
+    onEditHabit({
       title,
       category,
       color,
       xp,
     });
     
-    // Reset and close
-    setTitle('');
-    setCategory('');
-    setColor('purple');
+    // Close
     onClose();
   };
 
@@ -73,7 +71,7 @@ export default function AddHabitModal({ isOpen, onClose, onAddHabit }: AddHabitM
               <div className="w-10 h-10 rounded-xl bg-neon-purple/20 flex items-center justify-center border border-neon-purple/50">
                 <Target className="w-5 h-5 text-neon-purple" />
               </div>
-              <h2 className="text-xl font-bold text-white">Create New Habit</h2>
+              <h2 className="text-xl font-bold text-white">Edit Habit</h2>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -139,7 +137,7 @@ export default function AddHabitModal({ isOpen, onClose, onAddHabit }: AddHabitM
                 type="submit"
                 className="mt-4 w-full bg-neon-purple hover:bg-neon-purple/90 text-white font-semibold py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(168,85,247,0.4)]"
               >
-                Add Habit to Grind
+                Save Changes
               </button>
             </form>
           </motion.div>

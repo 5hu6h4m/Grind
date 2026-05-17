@@ -4,22 +4,17 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Target, Activity, Zap, Trophy, User, Settings, LogOut } from 'lucide-react';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { cn } from '@/lib/utils';
+import { signOut } from 'next-auth/react';
 
 const navItems = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Focus', href: '/focus', icon: Zap },
   { name: 'Habits', href: '/habits', icon: Target },
   { name: 'Analytics', href: '/analytics', icon: Activity },
-  { name: 'Focus Mode', href: '/focus', icon: Zap },
   { name: 'Achievements', href: '/achievements', icon: Trophy },
   { name: 'Profile', href: '/profile', icon: User },
 ];
-
 export default function Sidebar() {
   const pathname = usePathname();
 
@@ -53,7 +48,7 @@ export default function Sidebar() {
               <Icon 
                 className={cn(
                   "h-5 w-5 transition-colors", 
-                  isActive ? "text-neon-purple" : "text-zinc-500 group-hover:text-neon-purple/70"
+                  isActive ? "text-emerald-500" : "text-zinc-500 group-hover:text-emerald-500/70"
                 )} 
               />
               {item.name}
@@ -71,6 +66,7 @@ export default function Sidebar() {
           Settings
         </Link>
         <button
+          onClick={() => signOut({ callbackUrl: '/' })}
           className="group mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-400 transition-all hover:bg-danger/10 hover:text-danger"
         >
           <LogOut className="h-5 w-5 text-zinc-500 group-hover:text-danger/80" />

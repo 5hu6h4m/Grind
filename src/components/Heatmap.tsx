@@ -1,15 +1,12 @@
 'use client';
 
 import React from 'react';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-export function cn(...inputs: any[]) {
-  return twMerge(clsx(inputs));
-}
+import { cn } from '@/lib/utils';
 
 interface HeatmapProps {
   activityMap?: Record<string, number>;
+  colorTheme?: 'purple' | 'cyan' | 'green' | 'orange';
+  compact?: boolean;
 }
 
 // Generate data based on real map for the last 98 days
@@ -42,7 +39,7 @@ const generateDataFromMap = (activityMap: Record<string, number> = {}) => {
   return days;
 };
 
-const Heatmap = ({ activityMap }: HeatmapProps) => {
+const Heatmap = ({ activityMap, colorTheme = 'green', compact = false }: HeatmapProps) => {
   const data = React.useMemo(() => generateDataFromMap(activityMap), [activityMap]);
   const weeks = [];
   for (let i = 0; i < 14; i++) {
@@ -53,35 +50,41 @@ const Heatmap = ({ activityMap }: HeatmapProps) => {
   const activeDays = Object.values(activityMap || {}).filter(v => v > 0).length;
 
   const getIntensityColor = (level: number) => {
-    switch (level) {
-      case 1: return 'bg-neon-purple/20';
-      case 2: return 'bg-neon-purple/40';
-      case 3: return 'bg-neon-purple/70';
-      case 4: return 'bg-neon-purple shadow-[0_0_8px_rgba(168,85,247,0.6)]';
-      default: return 'bg-white/5';
-    }
+    if (level === 0) return 'bg-white/5';
+
+    const themes = {
+      purple: ['bg-success/20', 'bg-success/40', 'bg-success/70', 'bg-success shadow-[0_0_8px_rgba(34,197,94,0.6)]'],
+      cyan: ['bg-neon-cyan/20', 'bg-neon-cyan/40', 'bg-neon-cyan/70', 'bg-neon-cyan shadow-[0_0_8px_rgba(34,211,238,0.6)]'],
+      green: ['bg-success/20', 'bg-success/40', 'bg-success/70', 'bg-success shadow-[0_0_8px_rgba(34,197,94,0.6)]'],
+      orange: ['bg-warning/20', 'bg-warning/40', 'bg-warning/70', 'bg-warning shadow-[0_0_8px_rgba(245,158,11,0.6)]'],
+    };
+
+    const selectedTheme = themes[colorTheme] || themes.green;
+    return selectedTheme[level - 1] || selectedTheme[0];
   };
 
   return (
-    <div className="glass rounded-2xl p-6 border border-border">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-lg font-semibold text-white">Consistency</h3>
-          <p className="text-sm text-zinc-400">Your 90-day progress</p>
+    <div className={cn("flex flex-col w-full", !compact && "glass rounded-2xl p-6 border border-border")}>
+      {!compact && (
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-lg font-semibold text-white">Consistency</h3>
+            <p className="text-sm text-zinc-400">Your 90-day progress</p>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-bold text-white">{activeDays}<span className="text-sm text-zinc-500 font-normal ml-1">Days Active</span></div>
+          </div>
         </div>
-        <div className="text-right">
-          <div className="text-2xl font-bold text-white">{activeDays}<span className="text-sm text-zinc-500 font-normal ml-1">Days Active</span></div>
-        </div>
-      </div>
+      )}
       
-      <div className="flex gap-2 justify-end">
+      <div className={cn("flex gap-2", compact ? "justify-start" : "justify-end")}>
         {weeks.map((week, wIndex) => (
           <div key={wIndex} className="flex flex-col gap-2">
             {week.map((day) => (
               <div 
                 key={day.id} 
                 className={cn(
-                  "w-3 h-3 sm:w-4 sm:h-4 rounded-[3px] transition-all duration-300 hover:scale-125 cursor-pointer", 
+                  "w-3 h-3 sm:w-4 sm:h-4 rounded-full transition-all duration-300 hover:scale-125 cursor-pointer", 
                   getIntensityColor(day.intensity)
                 )}
                 title={`${day.formattedDate}: ${day.count} Completions`}
@@ -91,15 +94,17 @@ const Heatmap = ({ activityMap }: HeatmapProps) => {
         ))}
       </div>
       
-      <div className="flex items-center justify-end gap-2 mt-4 text-xs text-zinc-500">
-        <span>Less</span>
-        <div className="w-3 h-3 rounded-[3px] bg-white/5"></div>
-        <div className="w-3 h-3 rounded-[3px] bg-neon-purple/20"></div>
-        <div className="w-3 h-3 rounded-[3px] bg-neon-purple/40"></div>
-        <div className="w-3 h-3 rounded-[3px] bg-neon-purple/70"></div>
-        <div className="w-3 h-3 rounded-[3px] bg-neon-purple shadow-[0_0_5px_rgba(168,85,247,0.5)]"></div>
-        <span>More</span>
-      </div>
+      {!compact && (
+        <div className="flex items-center justify-end gap-2 mt-4 text-xs text-zinc-500">
+          <span>Less</span>
+          <div className="w-3 h-3 rounded-full bg-white/5"></div>
+          <div className="w-3 h-3 rounded-full bg-success/20"></div>
+          <div className="w-3 h-3 rounded-full bg-success/40"></div>
+          <div className="w-3 h-3 rounded-full bg-success/70"></div>
+          <div className="w-3 h-3 rounded-full bg-success shadow-[0_0_5px_rgba(34,197,94,0.5)]"></div>
+          <span>More</span>
+        </div>
+      )}
     </div>
   );
 };

@@ -9,9 +9,10 @@ import { addHabit, toggleHabit, deleteHabit, editHabit } from '@/app/actions';
 
 interface DashboardClientProps {
   initialHabits: HabitData[];
+  initialFocusXp: number;
 }
 
-export default function DashboardClient({ initialHabits }: DashboardClientProps) {
+export default function DashboardClient({ initialHabits, initialFocusXp }: DashboardClientProps) {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [habits, setHabits] = useState<HabitData[]>(initialHabits);
@@ -83,9 +84,22 @@ export default function DashboardClient({ initialHabits }: DashboardClientProps)
   };
 
   // Calculate dynamic stats based on optimistic state
-  const totalXp = habits.reduce((acc, h) => acc + (isHabitCompletedToday(h) ? h.xp : 0), 0) + 150; // Base 150 XP
+  const habitsXp = habits.reduce((acc, h) => acc + (h.completedDates.length * h.xp), 0);
+  const totalXp = 150 + initialFocusXp + habitsXp;
   const completedCount = habits.filter(h => isHabitCompletedToday(h)).length;
   const progressPercent = habits.length > 0 ? Math.round((completedCount / habits.length) * 100) : 0;
+  
+  // Calculate user level dynamically based on totalXp (350 XP per level)
+  const currentLevel = Math.floor(totalXp / 350) + 1;
+  
+  // Warrior ranks
+  let warriorRank = 'Beginner';
+  if (currentLevel >= 2) warriorRank = 'Consistency';
+  if (currentLevel >= 3) warriorRank = 'Focus Sentinel';
+  if (currentLevel >= 5) warriorRank = 'Discipline Master';
+  if (currentLevel >= 10) warriorRank = 'Ultimate Conqueror';
+
+  const longestStreak = habits.reduce((acc, h) => Math.max(acc, h.streak), 0);
   
   // Dynamic offset for SVG circle (circumference is ~502)
   const circleOffset = 502 - (502 * progressPercent) / 100;
@@ -102,8 +116,8 @@ export default function DashboardClient({ initialHabits }: DashboardClientProps)
         </div>
         <div className="flex items-center gap-4 glass px-5 py-2.5 rounded-full border border-border">
           <div className="flex flex-col text-right">
-            <span className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Level 1</span>
-            <span className="text-sm font-medium text-white">Beginner</span>
+            <span className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Level {currentLevel}</span>
+            <span className="text-sm font-medium text-white">{warriorRank}</span>
           </div>
           <div className="w-10 h-10 rounded-full bg-neon-purple/20 flex items-center justify-center border border-neon-purple/50">
             <Trophy className="w-5 h-5 text-neon-purple" />
@@ -116,7 +130,7 @@ export default function DashboardClient({ initialHabits }: DashboardClientProps)
         {[
           { label: 'Total XP', value: totalXp.toLocaleString(), icon: Zap, color: 'text-neon-cyan' },
           { label: 'Tasks Today', value: `${completedCount} / ${habits.length}`, icon: Target, color: 'text-neon-purple' },
-          { label: 'Longest Streak', value: '0 Days', icon: Trophy, color: 'text-warning' },
+          { label: 'Longest Streak', value: `${longestStreak} Days`, icon: Trophy, color: 'text-warning' },
           { label: 'Consistency', value: `${progressPercent}%`, icon: TrendingUp, color: 'text-success' },
         ].map((stat, i) => (
           <div key={i} className="glass p-5 rounded-2xl border border-border flex flex-col gap-3 relative overflow-hidden group">

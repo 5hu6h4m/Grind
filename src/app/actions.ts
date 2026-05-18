@@ -63,3 +63,22 @@ export async function editHabit(habitId: string, data: { title: string; category
   });
   revalidatePath('/');
 }
+
+export async function addFocusSession(duration: number, xpEarned: number) {
+  const session = await prisma.focusSession.create({
+    data: {
+      duration,
+      xpEarned,
+    }
+  });
+  revalidatePath('/');
+  return session;
+}
+
+export async function getFocusSessions() {
+  return await prisma.focusSession.findMany({
+    orderBy: {
+      createdAt: 'desc',
+    }
+  });
+}

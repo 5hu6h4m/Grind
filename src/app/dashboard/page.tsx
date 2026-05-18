@@ -36,5 +36,9 @@ export default async function DashboardPage() {
     };
   });
 
-  return <DashboardClient initialHabits={initialHabits} />;
+  // Fetch focus sessions for dynamic XP calculations
+  const focusSessions = await prisma.focusSession.findMany();
+  const initialFocusXp = focusSessions.reduce((acc, s) => acc + s.xpEarned, 0);
+
+  return <DashboardClient initialHabits={initialHabits} initialFocusXp={initialFocusXp} />;
 }

@@ -1,6 +1,5 @@
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
 }
 
 generator client {
@@ -16,6 +15,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   habits        Habit[]
+  focusSessions FocusSession[]
 }
 
 model Account {
@@ -78,4 +78,15 @@ model Completion {
 
   // Ensure a habit can only be completed once per day
   @@unique([habitId, date])
+}
+
+model FocusSession {
+  id        String   @id @default(uuid())
+  duration  Int      // Duration in minutes
+  xpEarned  Int      // XP granted
+  createdAt DateTime @default(now())
+  
+  // Auth Relation (Optional for local dev flexibility)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
